@@ -1,33 +1,30 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import openai
+import os
 from vector_store import get_relevant_chunks
 from gpt_logic import get_gpt_response
-import os
 
-# ✅ CORS middleware import
-from fastapi.middleware.cors import CORSMiddleware
-
-# 🔧 Create FastAPI app
 app = FastAPI()
 
-# ✅ CORS setup — this must come immediately after app = FastAPI()
+# ✅ CORS configuration (this works reliably for frontend <-> backend)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow requests from any origin
+    allow_origins=["*"],  # Allow any frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 🔑 Load OpenAI API key from environment
+# ✅ Load OpenAI key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# 📦 Define request body format
+# ✅ Request model
 class ChatRequest(BaseModel):
     message: str
 
-# 🤖 POST endpoint for chatbot
+# ✅ Main chatbot route
 @app.post("/chat")
 async def chat(req: ChatRequest):
     user_message = req.message
@@ -35,7 +32,7 @@ async def chat(req: ChatRequest):
     answer = get_gpt_response(user_message, context_chunks)
     return {"answer": answer}
 
-# 🧪 GET test route (for debugging and CORS testing)
+# ✅ Simple GET route to confirm service is running
 @app.get("/")
 async def root():
     return {"message": "Hello from chatbot backend!"}
