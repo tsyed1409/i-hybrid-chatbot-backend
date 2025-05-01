@@ -1,0 +1,8 @@
+# requirements.txt
+fastapi
+uvicorn
+openai
+faiss-cpu
+numpy
+pydantic
+python-multipart
