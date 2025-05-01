@@ -8,6 +8,14 @@ import os
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (safe for dev)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class ChatRequest(BaseModel):
