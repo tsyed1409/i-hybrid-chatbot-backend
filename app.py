@@ -6,21 +6,28 @@ from vector_store import get_relevant_chunks
 from gpt_logic import get_gpt_response
 import os
 
+# ✅ ADD CORS IMPORT
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
+# ✅ ENABLE CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (safe for dev)
+    allow_origins=["*"],  # Allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Load OpenAI key from environment
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Request model
 class ChatRequest(BaseModel):
     message: str
 
+# Chat endpoint
 @app.post("/chat")
 async def chat(req: ChatRequest):
     user_message = req.message
