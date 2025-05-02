@@ -5,7 +5,8 @@ from flask_cors import CORS
 from gpt_logic import get_response  # This should be your custom logic
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes and origins
+CORS(app, origins=["http://localhost:8000"])
+  # Enable CORS for all routes and origins
 
 # Health check endpoint
 @app.route('/')
