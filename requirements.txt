@@ -1,10 +1,10 @@
-# requirements.txt
 flask
-flask-cors
+flask-cors>=3.0.10
 openai
 faiss-cpu
 numpy
 pydantic
 python-multipart
+
 
 

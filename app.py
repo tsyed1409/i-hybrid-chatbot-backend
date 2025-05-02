@@ -5,15 +5,16 @@ from flask_cors import CORS
 from gpt_logic import get_response  # This should be your custom logic
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:8000"])
-  # Enable CORS for all routes and origins
 
-# Health check endpoint
+# ✅ Enable CORS for your local frontend
+CORS(app, resources={r"/*": {"origins": "http://localhost:8000"}})
+
+# ✅ Health check endpoint
 @app.route('/')
 def index():
     return jsonify({"status": "Chatbot backend is running!"})
 
-# Chat endpoint to receive user message and return AI response
+# ✅ Chat endpoint
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
