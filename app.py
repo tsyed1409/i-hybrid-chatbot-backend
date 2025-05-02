@@ -1,38 +1,30 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import openai
-import os
-from vector_store import get_relevant_chunks
-from gpt_logic import get_gpt_response
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from gpt_logic import get_response  # This should be your custom logic
 
-app = FastAPI()
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes and origins
 
-# ✅ CORS configuration (this works reliably for frontend <-> backend)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow any frontend
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Health check endpoint
+@app.route('/')
+def index():
+    return jsonify({"status": "Chatbot backend is running!"})
 
-# ✅ Load OpenAI key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Chat endpoint to receive user message and return AI response
+@app.route('/chat', methods=['POST'])
+def chat():
+    try:
+        data = request.get_json()
+        if not data or 'message' not in data:
+            return jsonify({'error': 'No message provided'}), 400
 
-# ✅ Request model
-class ChatRequest(BaseModel):
-    message: str
+        user_message = data['message']
+        ai_reply = get_response(user_message)
 
-# ✅ Main chatbot route
-@app.post("/chat")
-async def chat(req: ChatRequest):
-    user_message = req.message
-    context_chunks = get_relevant_chunks(user_message)
-    answer = get_gpt_response(user_message, context_chunks)
-    return {"answer": answer}
+        return jsonify({'response': ai_reply})
 
-# ✅ Simple GET route to confirm service is running
-@app.get("/")
-async def root():
-    return {"message": "Hello from chatbot backend!"}
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)

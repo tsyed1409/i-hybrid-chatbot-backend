@@ -1,8 +1,10 @@
 # requirements.txt
-fastapi
-uvicorn
+flask
+flask-cors
 openai
 faiss-cpu
 numpy
 pydantic
 python-multipart
+
+
