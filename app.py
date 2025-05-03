@@ -10,7 +10,8 @@ app = Flask(__name__)
 
 # ✅ Enable CORS for your local frontend
 frontend_origin = os.environ.get("FRONTEND_ORIGIN", "http://localhost:8000")
-CORS(app, origins=["http://localhost:8000"], supports_credentials=True)
+CORS(app, origins=["null", "http://localhost:8000"], supports_credentials=True)
+
 
 # ✅ Health check endpoint
 @app.route('/')
