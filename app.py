@@ -12,7 +12,7 @@ frontend_origin = os.environ.get("FRONTEND_ORIGIN", "http://localhost:8000")
 CORS(app, origins=[
     "null",
     "http://localhost:8000",
-    "https://ai-chatbot-frontend.onrender.com",  # ✅ your live frontend domain
+    "https://ai-chatbot-frontend-s5lk.onrender.com",  # ✅ your live frontend domain
 ], supports_credentials=True)
 
 
