@@ -1,6 +1,6 @@
 flask
 flask-cors==3.0.10
-openai
+openai==0.28.1
 faiss-cpu
 numpy
 pydantic
