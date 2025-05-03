@@ -31,8 +31,9 @@ def chat():
 
         return jsonify({'response': ai_reply})
 
-    except Exception as e:
-	print(f"Error in /chat: {str(e)}")
+       except Exception as e:
+        print(f"Error in /chat: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
 
 
