@@ -1,7 +1,11 @@
 # gpt_logic.py
 
 import openai
+import os
 from typing import List
+
+# ✅ Load API key from environment
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 MODEL = "gpt-4"  # or use "gpt-3.5-turbo" to save tokens
 
@@ -28,3 +32,4 @@ def get_gpt_response(question: str, context_chunks: List[str]) -> str:
     )
 
     return response.choices[0].message.content.strip()
+
