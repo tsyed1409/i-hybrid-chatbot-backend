@@ -2,12 +2,12 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from gpt_logic import get_response  # This should be your custom logic
+from gpt_logic import get_gpt_response  # ✅ Correct
 
 app = Flask(__name__)
 
 # ✅ Enable CORS for your local frontend
-CORS(app, resources={r"/*": {"origins": "http://localhost:8000"}})
+CORS(app, supports_credentials=True)
 
 # ✅ Health check endpoint
 @app.route('/')
@@ -23,7 +23,7 @@ def chat():
             return jsonify({'error': 'No message provided'}), 400
 
         user_message = data['message']
-        ai_reply = get_response(user_message)
+        ai_reply = get_gpt_response(user_message, context_chunks=[])  # ✅ new
 
         return jsonify({'response': ai_reply})
 
