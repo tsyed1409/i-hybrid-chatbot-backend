@@ -6,7 +6,7 @@ numpy
 pydantic
 python-multipart
 gunicorn
-
+git add app.py requirements.txt
 
 
 
