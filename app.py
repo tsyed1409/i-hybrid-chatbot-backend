@@ -7,7 +7,8 @@ from gpt_logic import get_gpt_response  # ✅ Correct
 app = Flask(__name__)
 
 # ✅ Enable CORS for your local frontend
-CORS(app, supports_credentials=True)
+frontend_origin = os.environ.get("FRONTEND_ORIGIN", "http://localhost:8000")
+CORS(app, origins=["http://localhost:8000"], supports_credentials=True)
 
 # ✅ Health check endpoint
 @app.route('/')
