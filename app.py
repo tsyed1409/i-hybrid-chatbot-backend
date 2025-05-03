@@ -9,7 +9,12 @@ app = Flask(__name__)
 
 # ✅ Enable CORS for local and file:// testing
 frontend_origin = os.environ.get("FRONTEND_ORIGIN", "http://localhost:8000")
-CORS(app, origins=["null", "http://localhost:8000"], supports_credentials=True)
+CORS(app, origins=[
+    "null",
+    "http://localhost:8000",
+    "https://ai-chatbot-frontend.onrender.com",  # ✅ your live frontend domain
+], supports_credentials=True)
+
 
 # ✅ Health check endpoint
 @app.route('/')
