@@ -1,6 +1,5 @@
 # Minor change to trigger redeploy
 
-
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -8,10 +7,9 @@ from gpt_logic import get_gpt_response  # ✅ Correct
 
 app = Flask(__name__)
 
-# ✅ Enable CORS for your local frontend
+# ✅ Enable CORS for local and file:// testing
 frontend_origin = os.environ.get("FRONTEND_ORIGIN", "http://localhost:8000")
 CORS(app, origins=["null", "http://localhost:8000"], supports_credentials=True)
-
 
 # ✅ Health check endpoint
 @app.route('/')
@@ -27,13 +25,10 @@ def chat():
             return jsonify({'error': 'No message provided'}), 400
 
         user_message = data['message']
-        ai_reply = get_gpt_response(user_message, context_chunks=[])  # ✅ new
+        ai_reply = get_gpt_response(user_message, context_chunks=[])
 
         return jsonify({'response': ai_reply})
 
-       except Exception as e:
+    except Exception as e:
         print(f"Error in /chat: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
-
-
