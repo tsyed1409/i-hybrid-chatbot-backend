@@ -37,3 +37,36 @@ def chat():
     except Exception as e:
         print(f"Error in /chat: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+from bs4 import BeautifulSoup
+import requests
+
+@app.route('/chat-with-url', methods=['POST'])
+def chat_with_url():
+    try:
+        data = request.get_json()
+        url = data.get('url')
+        message = data.get('message')
+
+        if not url or not message:
+            return jsonify({'error': 'Both URL and message are required'}), 400
+
+        # Fetch the web page
+        page = requests.get(url, timeout=5)
+        soup = BeautifulSoup(page.text, 'html.parser')
+
+        # Clean and extract the text
+        page_text = soup.get_text(separator=' ', strip=True)
+
+        # Trim to avoid going over GPT token limits
+        context = page_text[:3000]
+
+        # Use the same GPT function with webpage context
+        ai_reply = get_gpt_response(message, context_chunks=[context])
+
+        return jsonify({'response': ai_reply})
+
+    except Exception as e:
+        print(f"Error in /chat-with-url: {e}")
+        return jsonify({'error': str(e)}), 500
+
