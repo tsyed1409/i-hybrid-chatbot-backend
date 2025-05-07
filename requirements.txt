@@ -8,6 +8,8 @@ python-multipart
 gunicorn
 requests
 beautifulsoup4
+python-docx
+PyMuPDF
 
 
 
