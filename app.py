@@ -164,5 +164,39 @@ def store_in_faiss(embeddings, chunks):
     index.add(np.vstack(embeddings))
     metadata_store.extend(chunks)
     # Optional: persist index to disk if needed
+@app.route('/query-documents', methods=['POST'])
+def query_documents():
+    try:
+        data = request.get_json()
+        question = data.get('question')
+
+        if not question:
+            return jsonify({'error': 'No question provided'}), 400
+
+        # Embed the question
+        response = openai.Embedding.create(
+            input=question,
+            model="text-embedding-ada-002"
+        )
+        query_vector = np.array(response['data'][0]['embedding'], dtype='float32').reshape(1, -1)
+
+        # Search FAISS for top 5 matches
+        top_k = 5
+        D, I = index.search(query_vector, top_k)
+
+        # Get corresponding chunks
+        matched_chunks = [metadata_store[i] for i in I[0] if i < len(metadata_store)]
+
+        # Use GPT with matched chunks as context
+        ai_reply = get_gpt_response(question, context_chunks=matched_chunks)
+
+        return jsonify({'response': ai_reply})
+
+    except Exception as e:
+        print(f"Error in /query-documents: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
