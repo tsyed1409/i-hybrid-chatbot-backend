@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import requests
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True)  # ✅ Strong CORS
 
 @app.route('/')
 def index():
@@ -163,6 +163,7 @@ def query_documents():
 @app.route('/crawl-and-chat', methods=['POST', 'OPTIONS'])
 @cross_origin()
 def crawl_and_chat():
+    print(f"✅ Received request at /crawl-and-chat with method: {request.method}")
     if request.method == 'OPTIONS':
         return jsonify({'status': 'OK'}), 200
     try:
@@ -171,7 +172,7 @@ def crawl_and_chat():
         message = data.get('message')
         if not base_url or not message:
             return jsonify({'error': 'Both URL and message are required'}), 400
-        max_pages = 5
+        max_pages = 5  # You can increase if needed
         visited = set()
         queue = deque([base_url])
         all_text = ""
