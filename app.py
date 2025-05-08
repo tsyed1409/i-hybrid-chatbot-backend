@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from gpt_logic import get_gpt_response  # Ensure this is correctly implemented
 
 from bs4 import BeautifulSoup
@@ -9,15 +9,13 @@ import requests
 # Initialize Flask app
 app = Flask(__name__)
 
-# Enable CORS for all routes and origins for now (you can restrict it later)
+# Enable CORS for all routes and origins
 CORS(app, resources={r"/*": {"origins": "*"}})
-
 
 # Health check endpoint
 @app.route('/')
 def index():
     return jsonify({"status": "Chatbot backend is running!"})
-
 
 # GPT chat endpoint (general)
 @app.route('/chat', methods=['POST'])
@@ -34,7 +32,6 @@ def chat():
     except Exception as e:
         print(f"Error in /chat: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
 
 # GPT + website input endpoint
 @app.route('/chat-with-url', methods=['POST'])
@@ -70,10 +67,7 @@ def chat_with_url():
         print(f"Error in /chat-with-url: {e}")
         return jsonify({'error': str(e)}), 500
 
-
-# Main
-
-
+# Import for additional functionality
 import tempfile
 from werkzeug.utils import secure_filename
 import numpy as np
@@ -82,6 +76,8 @@ import faiss
 import openai
 from docx import Document as DocxDocument
 import fitz  # PyMuPDF
+from urllib.parse import urljoin, urlparse
+from collections import deque
 
 # Initialize FAISS index (global)
 embedding_dim = 1536  # For text-embedding-ada-002
@@ -120,8 +116,6 @@ def extract_text_from_file(filepath, ext):
     if ext == 'pdf':
         doc = fitz.open(filepath)
         return "\n".join([page.get_text() for page in doc])
-
-
     elif ext == 'docx':
         doc = DocxDocument(filepath)
         return "\n".join([para.text for para in doc.paragraphs])
@@ -130,73 +124,9 @@ def extract_text_from_file(filepath, ext):
             return f.read()
     else:
         raise ValueError("Unsupported file type")
+
 def chunk_text(text, max_tokens=500, overlap=50):
     sentences = text.split('. ')
     chunks = []
     current_chunk = []
-    current_len = 0
-
-    for sentence in sentences:
-        token_count = len(sentence.split())
-        if current_len + token_count > max_tokens:
-            chunks.append(' '.join(current_chunk))
-            current_chunk = current_chunk[-overlap:]  # Keep overlap
-            current_len = len(current_chunk)
-        current_chunk.append(sentence)
-        current_len += token_count
-
-    if current_chunk:
-        chunks.append(' '.join(current_chunk))
-    return chunks
-def embed_chunks(chunks):
-    embeddings = []
-    for chunk in chunks:
-        response = openai.Embedding.create(
-            input=chunk,
-            model="text-embedding-ada-002"
-        )
-        vector = response['data'][0]['embedding']
-        embeddings.append(np.array(vector, dtype='float32'))
-    return embeddings
-
-def store_in_faiss(embeddings, chunks):
-    global index, metadata_store
-    index.add(np.vstack(embeddings))
-    metadata_store.extend(chunks)
-    # Optional: persist index to disk if needed
-@app.route('/query-documents', methods=['POST'])
-def query_documents():
-    try:
-        data = request.get_json()
-        question = data.get('question')
-
-        if not question:
-            return jsonify({'error': 'No question provided'}), 400
-
-        # Embed the question
-        response = openai.Embedding.create(
-            input=question,
-            model="text-embedding-ada-002"
-        )
-        query_vector = np.array(response['data'][0]['embedding'], dtype='float32').reshape(1, -1)
-
-        # Search FAISS for top 5 matches
-        top_k = 5
-        D, I = index.search(query_vector, top_k)
-
-        # Get corresponding chunks
-        matched_chunks = [metadata_store[i] for i in I[0] if i < len(metadata_store)]
-
-        # Use GPT with matched chunks as context
-        ai_reply = get_gpt_response(question, context_chunks=matched_chunks)
-
-        return jsonify({'response': ai_reply})
-
-    except Exception as e:
-        print(f"Error in /query-documents: {e}")
-        return jsonify({'error': str(e)}), 500
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    current
