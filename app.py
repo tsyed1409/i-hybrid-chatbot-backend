@@ -85,6 +85,7 @@ def upload_file():
         chunks = chunk_text(text)
         embeddings = embed_chunks(chunks)
         store_in_faiss(embeddings, chunks)
+        print(f"✅ Uploaded and stored {len(embeddings)} chunks in FAISS.")  # ✅ Debug print
         return jsonify({'status': f'File {filename} processed and stored successfully'})
     except Exception as e:
         print(f"Upload error: {e}")
@@ -154,6 +155,7 @@ def query_documents():
         top_k = 5
         D, I = index.search(query_vector, top_k)
         matched_chunks = [metadata_store[i] for i in I[0] if i < len(metadata_store)]
+        print("🔍 Matched Chunks:\n", matched_chunks)  # ✅ Debug print
         ai_reply = get_gpt_response(question, context_chunks=matched_chunks)
         return jsonify({'response': ai_reply})
     except Exception as e:
