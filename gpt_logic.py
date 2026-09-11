@@ -1,35 +1,30 @@
-# gpt_logic.py
+"""OpenAI response helper for the chatbot backend."""
 
-import openai
 import os
 from typing import List
 
-# ✅ Load API key from environment
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from openai import OpenAI
 
-MODEL = "gpt-4"  # or use "gpt-3.5-turbo" to save tokens
+MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-5.6-luna")
+client = OpenAI()
+
 
 def get_gpt_response(question: str, context_chunks: List[str]) -> str:
+    """Generate an answer using optional retrieved context."""
     if context_chunks:
         context_text = "\n\n".join(context_chunks)
-        system_prompt = (
-            "You are a helpful assistant. Use the provided context to answer the user's question. "
-            "If the context is unclear or insufficient, use general knowledge."
+        instructions = (
+            "You are a helpful assistant. Answer using the supplied context where possible. "
+            "If the context does not contain the answer, say that clearly before using general knowledge."
         )
-        user_prompt = f"Context:\n{context_text}\n\nQuestion: {question}"
+        user_input = f"Context:\n{context_text}\n\nQuestion: {question}"
     else:
-        system_prompt = "You are a helpful assistant. Answer the user's question."
-        user_prompt = question
+        instructions = "You are a helpful assistant. Answer the user's question clearly and concisely."
+        user_input = question
 
-    response = openai.ChatCompletion.create(
+    response = client.responses.create(
         model=MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=0.5,
-        max_tokens=500
+        instructions=instructions,
+        input=user_input,
     )
-
-    return response.choices[0].message.content.strip()
-
+    return response.output_text.strip()
